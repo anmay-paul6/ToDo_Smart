@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Mail, Lock, User as UserIcon, ArrowRight, ShieldCheck, Flame, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Mail, Lock, User as UserIcon, ArrowRight, ShieldCheck, Flame } from 'lucide-react';
 import { storageService, DEFAULT_DEMO_USER } from '../services/storage';
 import type { UserProfile } from '../types/todo';
 
