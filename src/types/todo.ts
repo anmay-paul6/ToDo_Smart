@@ -55,6 +55,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  password?: string;
   avatarUrl?: string;
   topRatedReminderInterval: number; // in minutes, default 120 (2 hrs)
   soundEnabled: boolean;

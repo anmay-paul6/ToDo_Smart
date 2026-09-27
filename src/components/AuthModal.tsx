@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Flame, Award, Check } from 'lucide-react';
+import { X, User, Flame, Award, Check, LogOut } from 'lucide-react';
 import type { UserProfile } from '../types/todo';
 
 interface AuthModalProps {
@@ -7,13 +7,15 @@ interface AuthModalProps {
   onClose: () => void;
   user: UserProfile;
   onSaveUser: (updated: UserProfile) => void;
+  onLogout?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   user,
-  onSaveUser
+  onSaveUser,
+  onLogout
 }) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
@@ -84,17 +86,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             margin: '0 auto 0.75rem auto',
             boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)'
           }}>
-            {user.name.charAt(0)}
+            {user.name.charAt(0).toUpperCase()}
           </div>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{user.name}</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{user.email}</p>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginTop: '0.85rem' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Flame size={16} /> {user.streakDays || 5} Day Streak
+              <Flame size={16} /> {user.streakDays || 1} Day Streak
             </span>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Award size={16} /> Pro Account
+              <Award size={16} /> Isolated Data
             </span>
           </div>
         </div>
@@ -126,17 +128,46 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-            <button type="button" onClick={onClose} className="btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary">
-              <Check size={18} />
-              <span>Save Profile</span>
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            {onLogout && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  onClose();
+                  onLogout();
+                }} 
+                style={{
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '10px',
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <LogOut size={16} />
+                <span>Log Out</span>
+              </button>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" onClick={onClose} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary">
+                <Check size={18} />
+                <span>Save</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </div>
   );
 };
+

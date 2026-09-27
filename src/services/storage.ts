@@ -1,13 +1,14 @@
 import type { Task, UserProfile } from '../types/todo';
 import { generateTopRatedReminders } from '../utils/reminderEngine';
 
-const STORAGE_KEY_TASKS = 'smart_todo_tasks_v1';
-const STORAGE_KEY_USER = 'smart_todo_user_v1';
+const STORAGE_KEY_USERS = 'smart_todo_users_v2';
+const STORAGE_KEY_ACTIVE_USER = 'smart_todo_active_user_v2';
 
-export const DEFAULT_USER: UserProfile = {
-  id: 'user-default-1',
+export const DEFAULT_DEMO_USER: UserProfile = {
+  id: 'user-alex-demo',
   name: 'Alex Morgan',
   email: 'alex@productivity.io',
+  password: 'demo',
   topRatedReminderInterval: 120, // 2 hours
   soundEnabled: true,
   browserNotificationsEnabled: true,
@@ -19,7 +20,7 @@ export const DEFAULT_USER: UserProfile = {
 export const INITIAL_SAMPLE_TASKS: Task[] = [
   {
     id: 'task-sample-1',
-    userId: 'user-default-1',
+    userId: 'user-alex-demo',
     title: '🚀 Launch Q3 Product Sprint & Architecture Review',
     description: 'Review system design documents, assign backend tickets, verify security compliance, and finalize release candidate.',
     completed: false,
@@ -46,7 +47,7 @@ export const INITIAL_SAMPLE_TASKS: Task[] = [
   },
   {
     id: 'task-sample-2',
-    userId: 'user-default-1',
+    userId: 'user-alex-demo',
     title: '🔥 Finalize Client Proposal & Financial Breakdown',
     description: 'Calculate resource costs, compile deliverable timeline, and send finalized PDF to prospective enterprise partner.',
     completed: false,
@@ -72,7 +73,7 @@ export const INITIAL_SAMPLE_TASKS: Task[] = [
   },
   {
     id: 'task-sample-3',
-    userId: 'user-default-1',
+    userId: 'user-alex-demo',
     title: '🏋️‍♂️ Morning High-Intensity Cardio & Core Workout',
     description: '45-minute circuit training at local gym followed by stretching and hydration tracking.',
     completed: true,
@@ -93,117 +94,156 @@ export const INITIAL_SAMPLE_TASKS: Task[] = [
       { id: 'sub-3-2', title: 'Core stability routine', completed: true }
     ],
     reminders: []
-  },
-  {
-    id: 'task-sample-4',
-    userId: 'user-default-1',
-    title: '⚠️ Review Monthly Cloud Infrastructure Bill & Server Log Audit',
-    description: 'Check AWS/GCP resource utilization, delete unattached EBS volumes, and resolve pending security patches.',
-    completed: false,
-    completedAt: null,
-    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
-    updatedAt: new Date().toISOString(),
-    dueDate: new Date(Date.now() - 3600000 * 24 * 1).toISOString().split('T')[0], // Overdue (Yesterday)
-    dueTime: '12:00',
-    priority: 'high',
-    category: 'Work',
-    tags: ['DevOps', 'Overdue', 'Budget'],
-    recurring: 'monthly',
-    status: 'todo',
-    estimatedMinutes: 30,
-    timeSpentMinutes: 10,
-    subtasks: [
-      { id: 'sub-4-1', title: 'Inspect node cluster memory footprint', completed: true },
-      { id: 'sub-4-2', title: 'Clean up stale docker container images', completed: false }
-    ],
-    reminders: []
-  },
-  {
-    id: 'task-sample-5',
-    userId: 'user-default-1',
-    title: '📚 Read 2 Chapters of "Designing Data-Intensive Applications"',
-    description: 'Focus on consensus algorithms, Raft protocol, and distributed transactions.',
-    completed: false,
-    completedAt: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    dueDate: new Date(Date.now() + 3600000 * 24 * 2).toISOString().split('T')[0], // Upcoming
-    dueTime: '21:00',
-    priority: 'medium',
-    category: 'Study',
-    tags: ['Learning', 'Systems'],
-    recurring: 'none',
-    status: 'todo',
-    estimatedMinutes: 50,
-    timeSpentMinutes: 0,
-    subtasks: [],
-    reminders: []
-  },
-  {
-    id: 'task-sample-6',
-    userId: 'user-default-1',
-    title: '🛒 Weekly Meal Prep & Organic Groceries',
-    description: 'Buy fresh produce, chicken breast, quinoa, avocados, and Greek yogurt.',
-    completed: false,
-    completedAt: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    dueDate: new Date(Date.now() + 3600000 * 24 * 1).toISOString().split('T')[0], // Tomorrow
-    dueTime: '17:00',
-    priority: 'low',
-    category: 'Personal',
-    tags: ['Life', 'Health'],
-    recurring: 'weekly',
-    status: 'todo',
-    estimatedMinutes: 40,
-    timeSpentMinutes: 0,
-    subtasks: [
-      { id: 'sub-6-1', title: 'Check pantry supplies', completed: true },
-      { id: 'sub-6-2', title: 'Order via grocery app or visit market', completed: false }
-    ],
-    reminders: []
   }
 ];
 
 export class StorageService {
-  // --- USER PROFILE ---
-  getUser(): UserProfile {
-    const raw = localStorage.getItem(STORAGE_KEY_USER);
+  private getTaskStorageKey(userId: string): string {
+    return `smart_todo_tasks_v2_${userId}`;
+  }
+
+  // --- MULTI-USER MANAGEMENT ---
+  getUsers(): UserProfile[] {
+    const raw = localStorage.getItem(STORAGE_KEY_USERS);
     if (!raw) {
-      this.saveUser(DEFAULT_USER);
-      return DEFAULT_USER;
+      this.saveUsers([DEFAULT_DEMO_USER]);
+      return [DEFAULT_DEMO_USER];
     }
     try {
-      return JSON.parse(raw);
+      const users: UserProfile[] = JSON.parse(raw);
+      if (users.length === 0) {
+        this.saveUsers([DEFAULT_DEMO_USER]);
+        return [DEFAULT_DEMO_USER];
+      }
+      return users;
     } catch {
-      return DEFAULT_USER;
+      return [DEFAULT_DEMO_USER];
     }
   }
 
-  saveUser(user: UserProfile): void {
-    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+  saveUsers(users: UserProfile[]): void {
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
   }
 
-  // --- TASKS ---
-  getTasks(): Task[] {
-    const raw = localStorage.getItem(STORAGE_KEY_TASKS);
+  getActiveUserId(): string | null {
+    return localStorage.getItem(STORAGE_KEY_ACTIVE_USER);
+  }
+
+  setActiveUserId(userId: string | null): void {
+    if (userId) {
+      localStorage.setItem(STORAGE_KEY_ACTIVE_USER, userId);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_ACTIVE_USER);
+    }
+  }
+
+  getCurrentUser(): UserProfile | null {
+    const activeId = this.getActiveUserId();
+    if (!activeId) return null;
+    const users = this.getUsers();
+    return users.find(u => u.id === activeId) || null;
+  }
+
+  // Backwards compatibility fallback getter
+  getUser(): UserProfile {
+    const current = this.getCurrentUser();
+    if (current) return current;
+    const users = this.getUsers();
+    const demo = users[0] || DEFAULT_DEMO_USER;
+    this.setActiveUserId(demo.id);
+    return demo;
+  }
+
+  saveUser(updatedUser: UserProfile): void {
+    const users = this.getUsers();
+    const idx = users.findIndex(u => u.id === updatedUser.id);
+    if (idx >= 0) {
+      users[idx] = updatedUser;
+    } else {
+      users.push(updatedUser);
+    }
+    this.saveUsers(users);
+  }
+
+  // --- AUTHENTICATION FLOWS ---
+  login(email: string, password?: string): { success: boolean; user?: UserProfile; error?: string } {
+    const cleanEmail = email.trim().toLowerCase();
+    const users = this.getUsers();
+    const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+    if (!user) {
+      return { success: false, error: 'No account found with this email address.' };
+    }
+
+    if (user.password && password && user.password !== password) {
+      return { success: false, error: 'Incorrect password. Please try again.' };
+    }
+
+    // Set active session
+    this.setActiveUserId(user.id);
+    return { success: true, user };
+  }
+
+  register(name: string, email: string, password?: string): { success: boolean; user?: UserProfile; error?: string } {
+    const cleanEmail = email.trim().toLowerCase();
+    const users = this.getUsers();
+
+    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
+      return { success: false, error: 'An account with this email already exists. Please log in.' };
+    }
+
+    const newUser: UserProfile = {
+      id: `user-${Date.now()}`,
+      name: name.trim() || 'New Productivity User',
+      email: cleanEmail,
+      password: password || '',
+      topRatedReminderInterval: 120,
+      soundEnabled: true,
+      browserNotificationsEnabled: true,
+      theme: 'dark',
+      streakDays: 1,
+      lastActiveDate: new Date().toISOString().split('T')[0]
+    };
+
+    users.push(newUser);
+    this.saveUsers(users);
+    this.setActiveUserId(newUser.id);
+
+    // Initialize empty task list for new user
+    this.saveTasksForUser(newUser.id, []);
+
+    return { success: true, user: newUser };
+  }
+
+  logout(): void {
+    this.setActiveUserId(null);
+  }
+
+  // --- ISOLATED PER-USER TASKS STORAGE ---
+  private getTasksForUser(userId: string): Task[] {
+    const key = this.getTaskStorageKey(userId);
+    const raw = localStorage.getItem(key);
+
     if (!raw) {
-      // Seed sample tasks
-      const seeded = INITIAL_SAMPLE_TASKS.map(t => {
-        if (t.priority === 'top_rated') {
-          return {
-            ...t,
-            reminders: generateTopRatedReminders(t, t.topRatedIntervalMinutes || 120)
-          };
-        }
-        return t;
-      });
-      this.saveTasks(seeded);
-      return seeded;
+      // If demo user, seed initial sample tasks
+      if (userId === DEFAULT_DEMO_USER.id) {
+        const seeded = INITIAL_SAMPLE_TASKS.map(t => {
+          if (t.priority === 'top_rated') {
+            return {
+              ...t,
+              reminders: generateTopRatedReminders(t, t.topRatedIntervalMinutes || 120)
+            };
+          }
+          return t;
+        });
+        this.saveTasksForUser(userId, seeded);
+        return seeded;
+      }
+      return [];
     }
+
     try {
       const parsed: Task[] = JSON.parse(raw);
-      // Ensure top_rated tasks have reminders populated
       return parsed.map(t => {
         if (t.priority === 'top_rated' && (!t.reminders || t.reminders.length === 0)) {
           return {
@@ -214,20 +254,35 @@ export class StorageService {
         return t;
       });
     } catch {
-      return INITIAL_SAMPLE_TASKS;
+      return [];
     }
   }
 
+  private saveTasksForUser(userId: string, tasks: Task[]): void {
+    const key = this.getTaskStorageKey(userId);
+    localStorage.setItem(key, JSON.stringify(tasks));
+  }
+
+  getTasks(): Task[] {
+    const user = this.getCurrentUser();
+    if (!user) return [];
+    return this.getTasksForUser(user.id);
+  }
+
   saveTasks(tasks: Task[]): void {
-    localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+    const user = this.getCurrentUser();
+    if (!user) return;
+    this.saveTasksForUser(user.id, tasks);
   }
 
   saveTask(task: Task): Task[] {
-    const tasks = this.getTasks();
+    const user = this.getCurrentUser();
+    if (!user) return [];
+
+    const tasks = this.getTasksForUser(user.id);
     const index = tasks.findIndex(t => t.id === task.id);
 
-    // Auto generate Top Rated reminders if priority is top_rated
-    let updatedTask = { ...task, updatedAt: new Date().toISOString() };
+    let updatedTask = { ...task, userId: user.id, updatedAt: new Date().toISOString() };
     if (updatedTask.priority === 'top_rated' && !updatedTask.completed) {
       updatedTask.reminders = generateTopRatedReminders(
         updatedTask, 
@@ -241,79 +296,96 @@ export class StorageService {
       tasks.unshift(updatedTask);
     }
 
-    this.saveTasks(tasks);
+    this.saveTasksForUser(user.id, tasks);
     return tasks;
   }
 
   deleteTask(taskId: string): Task[] {
-    const tasks = this.getTasks().filter(t => t.id !== taskId);
-    this.saveTasks(tasks);
+    const user = this.getCurrentUser();
+    if (!user) return [];
+
+    const tasks = this.getTasksForUser(user.id).filter(t => t.id !== taskId);
+    this.saveTasksForUser(user.id, tasks);
     return tasks;
   }
 
   toggleTaskComplete(taskId: string): Task[] {
-    const tasks = this.getTasks();
+    const user = this.getCurrentUser();
+    if (!user) return [];
+
+    const tasks = this.getTasksForUser(user.id);
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       task.completed = !task.completed;
       task.completedAt = task.completed ? new Date().toISOString() : null;
       task.status = task.completed ? 'completed' : 'todo';
       task.updatedAt = new Date().toISOString();
-      this.saveTasks(tasks);
+      this.saveTasksForUser(user.id, tasks);
     }
     return tasks;
   }
 
   updateTaskStatus(taskId: string, status: 'todo' | 'in_progress' | 'completed'): Task[] {
-    const tasks = this.getTasks();
+    const user = this.getCurrentUser();
+    if (!user) return [];
+
+    const tasks = this.getTasksForUser(user.id);
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       task.status = status;
       task.completed = status === 'completed';
       task.completedAt = status === 'completed' ? new Date().toISOString() : null;
       task.updatedAt = new Date().toISOString();
-      this.saveTasks(tasks);
+      this.saveTasksForUser(user.id, tasks);
     }
     return tasks;
   }
 
   resetToSampleData(): Task[] {
+    const user = this.getCurrentUser();
+    if (!user) return [];
+
     const seeded = INITIAL_SAMPLE_TASKS.map(t => {
-      if (t.priority === 'top_rated') {
+      const copy = { ...t, userId: user.id };
+      if (copy.priority === 'top_rated') {
         return {
-          ...t,
-          reminders: generateTopRatedReminders(t, t.topRatedIntervalMinutes || 120)
+          ...copy,
+          reminders: generateTopRatedReminders(copy, copy.topRatedIntervalMinutes || 120)
         };
       }
-      return t;
+      return copy;
     });
-    this.saveTasks(seeded);
+    this.saveTasksForUser(user.id, seeded);
     return seeded;
   }
 
   clearAllData(): Task[] {
-    this.saveTasks([]);
+    const user = this.getCurrentUser();
+    if (!user) return [];
+    this.saveTasksForUser(user.id, []);
     return [];
   }
 
   exportData(): string {
+    const user = this.getCurrentUser();
     const data = {
-      user: this.getUser(),
-      tasks: this.getTasks(),
+      user: user,
+      tasks: user ? this.getTasksForUser(user.id) : [],
       exportDate: new Date().toISOString(),
-      version: '1.0'
+      version: '2.0'
     };
     return JSON.stringify(data, null, 2);
   }
 
   importData(jsonString: string): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+
     try {
       const parsed = JSON.parse(jsonString);
       if (parsed.tasks && Array.isArray(parsed.tasks)) {
-        this.saveTasks(parsed.tasks);
-        if (parsed.user) {
-          this.saveUser(parsed.user);
-        }
+        const userTasks = parsed.tasks.map((t: Task) => ({ ...t, userId: user.id }));
+        this.saveTasksForUser(user.id, userTasks);
         return true;
       }
       return false;

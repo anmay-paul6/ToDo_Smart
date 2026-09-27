@@ -12,6 +12,7 @@ import { TaskModal } from './components/TaskModal';
 import { TopRatedReminderModal } from './components/TopRatedReminderModal';
 import { AuthModal } from './components/AuthModal';
 import { SettingsModal } from './components/SettingsModal';
+import { AuthScreen } from './components/AuthScreen';
 
 import type { 
   Task, 
@@ -24,9 +25,9 @@ import { storageService } from './services/storage';
 import { reminderEngine } from './utils/reminderEngine';
 
 export function App() {
-  // User & Task State
-  const [user, setUser] = useState<UserProfile>(() => storageService.getUser());
-  const [tasks, setTasks] = useState<Task[]>(() => storageService.getTasks());
+  // Active User & Isolated Tasks State
+  const [user, setUser] = useState<UserProfile | null>(() => storageService.getCurrentUser());
+  const [tasks, setTasks] = useState<Task[]>(() => user ? storageService.getTasks() : []);
   
   // Navigation & Filtering
   const [currentView, setCurrentView] = useState<ViewMode>('dashboard');
@@ -57,13 +58,14 @@ export function App() {
 
   // Sync dark/light theme to <html> element
   useEffect(() => {
+    if (!user) return;
     const root = document.documentElement;
     if (user.theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-  }, [user.theme]);
+  }, [user?.theme]);
 
   // Handle tasks updates
   const updateTasksState = useCallback((newTasks: Task[]) => {
@@ -72,6 +74,7 @@ export function App() {
 
   // Initialize Smart Reminder Engine for Top Rated tasks
   useEffect(() => {
+    if (!user) return;
     reminderEngine.startEngine(
       () => storageService.getTasks(),
       (updatedTask: Task) => {
@@ -88,7 +91,24 @@ export function App() {
     return () => {
       reminderEngine.stopEngine();
     };
-  }, [user.soundEnabled, user.browserNotificationsEnabled, updateTasksState]);
+  }, [user?.soundEnabled, user?.browserNotificationsEnabled, updateTasksState]);
+
+  const handleLoginSuccess = (loggedInUser: UserProfile) => {
+    setUser(loggedInUser);
+    setTasks(storageService.getTasks());
+  };
+
+  const handleLogout = () => {
+    storageService.logout();
+    setUser(null);
+    setTasks([]);
+    setIsAuthModalOpen(false);
+  };
+
+  // Render AuthScreen if user is not authenticated
+  if (!user) {
+    return <AuthScreen onLoginSuccess={handleLoginSuccess} />;
+  }
 
   // Extract list of categories
   const categories = Array.from(new Set(tasks.map(t => t.category))).filter(Boolean);
@@ -391,6 +411,7 @@ export function App() {
         onClose={() => setIsAuthModalOpen(false)}
         user={user}
         onSaveUser={handleSaveUser}
+        onLogout={handleLogout}
       />
 
       <SettingsModal
