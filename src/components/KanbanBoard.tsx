@@ -23,15 +23,77 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onStartFocus,
   onOpenCreateModal
 }) => {
+  const [activeMobileTab, setActiveMobileTab] = React.useState<'all' | 'todo' | 'in_progress' | 'completed'>('all');
+
   const columns: { id: 'todo' | 'in_progress' | 'completed'; title: string; color: string; icon: string }[] = [
     { id: 'todo', title: 'To Do', color: '#6366f1', icon: '📋' },
     { id: 'in_progress', title: 'In Progress', color: '#f59e0b', icon: '⚡' },
     { id: 'completed', title: 'Completed', color: '#10b981', icon: '✅' },
   ];
 
+  const visibleColumns = columns.filter(col => activeMobileTab === 'all' || activeMobileTab === col.id);
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', minHeight: '600px' }}>
-      {columns.map(col => {
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      
+      {/* Mobile Kanban Tab Selector (visible on mobile) */}
+      <div 
+        className="mobile-menu-btn" 
+        style={{
+          display: 'flex',
+          gap: '0.4rem',
+          background: 'var(--bg-secondary)',
+          padding: '0.4rem',
+          borderRadius: '12px',
+          border: '1px solid var(--border-color)',
+          overflowX: 'auto'
+        }}
+      >
+        <button
+          onClick={() => setActiveMobileTab('all')}
+          style={{
+            flex: 1,
+            padding: '0.45rem 0.75rem',
+            borderRadius: '8px',
+            border: 'none',
+            background: activeMobileTab === 'all' ? 'var(--accent-primary)' : 'transparent',
+            color: activeMobileTab === 'all' ? '#fff' : 'var(--text-secondary)',
+            fontWeight: activeMobileTab === 'all' ? 700 : 500,
+            fontSize: '0.8rem',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          All Columns
+        </button>
+        {columns.map(col => {
+          const count = tasks.filter(t => (t.status || (t.completed ? 'completed' : 'todo')) === col.id).length;
+          const isActive = activeMobileTab === col.id;
+          return (
+            <button
+              key={col.id}
+              onClick={() => setActiveMobileTab(col.id)}
+              style={{
+                flex: 1,
+                padding: '0.45rem 0.75rem',
+                borderRadius: '8px',
+                border: 'none',
+                background: isActive ? 'var(--accent-primary)' : 'transparent',
+                color: isActive ? '#fff' : 'var(--text-secondary)',
+                fontWeight: isActive ? 700 : 500,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {col.icon} {col.title} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', minHeight: '500px' }}>
+        {visibleColumns.map(col => {
         const colTasks = tasks.filter(t => (t.status || (t.completed ? 'completed' : 'todo')) === col.id);
 
         return (
@@ -175,6 +237,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           </div>
         );
       })}
+      </div>
     </div>
   );
 };

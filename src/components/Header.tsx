@@ -8,7 +8,8 @@ import {
   BellOff, 
   Sun, 
   Moon, 
-  Settings
+  Settings,
+  Menu
 } from 'lucide-react';
 import type { UserProfile, Task } from '../types/todo';
 
@@ -24,6 +25,7 @@ interface HeaderProps {
   onTriggerNotificationPermission: () => void;
   activeTopRatedCount: number;
   onFilterTopRated: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -36,13 +38,14 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
   onTriggerNotificationPermission,
   activeTopRatedCount,
-  onFilterTopRated
+  onFilterTopRated,
+  onToggleMobileMenu
 }) => {
   const isDark = user.theme === 'dark';
   const hasNotificationPermission = typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted';
 
   return (
-    <header style={{
+    <header className="header-container" style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -56,34 +59,54 @@ export const Header: React.FC<HeaderProps> = ({
       gap: '1rem',
       flexWrap: 'wrap'
     }}>
-      {/* Brand & Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      {/* Brand & Mobile Hamburger Toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        <button
+          onClick={onToggleMobileMenu}
+          className="mobile-menu-btn"
+          title="Toggle Navigation Menu"
+          style={{
+            background: 'var(--bg-tertiary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '10px',
+            width: '38px',
+            height: '38px',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+        >
+          <Menu size={20} />
+        </button>
+
         <div style={{
-          width: '40px',
-          height: '40px',
+          width: '38px',
+          height: '38px',
           borderRadius: '12px',
           background: 'linear-gradient(135deg, #6366f1 0%, #f59e0b 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: '#ffffff',
-          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)'
+          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+          flexShrink: 0
         }}>
-          <Sparkles size={22} />
+          <Sparkles size={20} />
         </div>
         <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            TaskPulse <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', background: 'var(--accent-glow)', color: 'var(--accent-primary)', padding: '0.15rem 0.4rem', borderRadius: '6px', fontWeight: 700 }}>PRO</span>
+          <h1 style={{ fontSize: '1.15rem', fontWeight: 800, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            TaskPulse <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', background: 'var(--accent-glow)', color: 'var(--accent-primary)', padding: '0.1rem 0.35rem', borderRadius: '6px', fontWeight: 700 }}>PRO</span>
           </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Smart Adaptive Productivity</p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Smart Adaptive TODO</p>
         </div>
       </div>
 
       {/* Instant Search Bar */}
-      <div style={{
+      <div className="header-search" style={{
         flex: '1',
         maxWidth: '450px',
-        minWidth: '220px',
+        minWidth: '200px',
         position: 'relative'
       }}>
         <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />

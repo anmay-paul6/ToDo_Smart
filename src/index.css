@@ -286,3 +286,129 @@ h1, h2, h3, h4, h5, h6 {
 .toast-alert {
   animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ==========================================================================
+   Mobile Responsive Utilities & Adaptations
+   ========================================================================== */
+
+/* Default Desktop/Tablet Displays */
+.sidebar-desktop {
+  display: flex;
+}
+.sidebar-drawer-overlay {
+  display: none;
+}
+.mobile-bottom-nav {
+  display: none;
+}
+.mobile-menu-btn {
+  display: none;
+}
+.hide-on-mobile {
+  display: flex;
+}
+
+.responsive-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.responsive-priority-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.responsive-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Mobile Screens Adjustments (< 768px) */
+@media (max-width: 768px) {
+  .app-main-content {
+    padding: 1rem 0.85rem !important;
+    padding-bottom: 5.5rem !important; /* Extra bottom clearance for mobile bottom navbar */
+  }
+
+  .sidebar-desktop {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  /* Responsive Form Grids */
+  .responsive-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .responsive-priority-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  .responsive-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .responsive-card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  /* Header Mobile Layout */
+  .header-container {
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .header-search {
+    order: 3;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 0.25rem;
+  }
+
+  .user-name-text {
+    display: none !important;
+  }
+
+  /* Modals on Mobile */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-content {
+    padding: 1.25rem 1rem !important;
+    max-height: 90vh !important;
+    border-radius: 24px 24px 0 0 !important;
+  }
+
+  /* Calendar compact cells */
+  .calendar-day-cell {
+    min-height: 65px !important;
+    padding: 0.25rem !important;
+  }
+}
+

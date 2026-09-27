@@ -118,7 +118,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   };
 
   return (
-    <div style={{
+    <div className="modal-overlay" style={{
       position: 'fixed',
       top: 0,
       left: 0,
@@ -190,7 +190,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
               Priority Level
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+            <div className="responsive-priority-grid">
               {(['low', 'medium', 'high', 'top_rated'] as Priority[]).map((p) => {
                 const isSelected = priority === p;
                 const isTopRated = p === 'top_rated';
@@ -272,7 +272,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           )}
 
           {/* Category & Tags */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="responsive-form-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 Category
@@ -330,7 +330,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           </div>
 
           {/* Due Date, Time, Recurring, Estimated Minutes */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="responsive-form-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 Due Date
@@ -356,7 +356,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="responsive-form-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 Recurring Schedule

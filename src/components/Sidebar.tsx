@@ -10,7 +10,8 @@ import {
   AlertCircle, 
   RotateCcw,
   Download,
-  FolderOpen
+  FolderOpen,
+  X
 } from 'lucide-react';
 import type { ViewMode, Task, Priority } from '../types/todo';
 
@@ -24,6 +25,8 @@ interface SidebarProps {
   onSelectPriority: (priority: string) => void;
   onResetData: () => void;
   onExportData: () => void;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -35,7 +38,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   selectedPriority,
   onSelectPriority,
   onResetData,
-  onExportData
+  onExportData,
+  isOpenMobile = false,
+  onCloseMobile
 }) => {
   // Compute counts
   const totalActive = tasks.filter(t => !t.completed).length;
@@ -64,22 +69,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'low', label: 'Low Priority', color: '#10b981', count: tasks.filter(t => t.priority === 'low' && !t.completed).length },
   ];
 
-  return (
-    <aside style={{
-      width: '260px',
-      background: 'var(--bg-secondary)',
-      borderRight: '1px solid var(--border-color)',
-      padding: '1.25rem 1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      gap: '1.5rem',
-      height: 'calc(100vh - 65px)',
-      overflowY: 'auto',
-      position: 'sticky',
-      top: '65px',
-      flexShrink: 0
-    }}>
+  const sidebarInnerContent = (
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         
         {/* Main Navigation */}
@@ -94,7 +85,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               return (
                 <button
                   key={item.id}
-                  onClick={() => onSelectView(item.id)}
+                  onClick={() => {
+                    onSelectView(item.id);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -146,7 +140,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               return (
                 <button
                   key={p.id}
-                  onClick={() => onSelectPriority(isSelected ? 'all' : p.id)}
+                  onClick={() => {
+                    onSelectPriority(isSelected ? 'all' : p.id);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -190,7 +187,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </p>
             {selectedCategory !== 'all' && (
               <button 
-                onClick={() => onSelectCategory('all')}
+                onClick={() => {
+                  onSelectCategory('all');
+                  if (onCloseMobile) onCloseMobile();
+                }}
                 style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
               >
                 Clear
@@ -203,7 +203,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               return (
                 <button
                   key={catName}
-                  onClick={() => onSelectCategory(isSelected ? 'all' : catName)}
+                  onClick={() => {
+                    onSelectCategory(isSelected ? 'all' : catName);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -234,7 +237,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Quick Utilities Footer */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
         <button
-          onClick={onExportData}
+          onClick={() => {
+            onExportData();
+            if (onCloseMobile) onCloseMobile();
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -254,7 +260,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
 
         <button
-          onClick={onResetData}
+          onClick={() => {
+            onResetData();
+            if (onCloseMobile) onCloseMobile();
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -273,7 +282,93 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>Reset Sample Data</span>
         </button>
       </div>
+    </>
+  );
 
-    </aside>
+  return (
+    <>
+      {/* Desktop Column Sidebar */}
+      <aside 
+        className="sidebar-desktop"
+        style={{
+          width: '260px',
+          background: 'var(--bg-secondary)',
+          borderRight: '1px solid var(--border-color)',
+          padding: '1.25rem 1rem',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: '1.5rem',
+          height: 'calc(100vh - 65px)',
+          overflowY: 'auto',
+          position: 'sticky',
+          top: '65px',
+          flexShrink: 0
+        }}
+      >
+        {sidebarInnerContent}
+      </aside>
+
+      {/* Mobile Slide-Over Drawer Navigation */}
+      {isOpenMobile && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 90,
+          display: 'flex'
+        }}>
+          <div 
+            onClick={onCloseMobile} 
+            style={{ position: 'absolute', inset: 0 }} 
+          />
+
+          <div style={{
+            width: '285px',
+            height: '100%',
+            background: 'var(--bg-secondary)',
+            borderRight: '1px solid var(--border-color)',
+            padding: '1.25rem 1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '1.5rem',
+            zIndex: 91,
+            overflowY: 'auto',
+            boxShadow: '4px 0 24px rgba(0,0,0,0.5)',
+            position: 'relative',
+            animation: 'modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          }}>
+            {/* Drawer Header Close Button */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
+              <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)' }}>Navigation Menu</span>
+              <button 
+                onClick={onCloseMobile}
+                style={{
+                  background: 'var(--bg-tertiary)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {sidebarInnerContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
+

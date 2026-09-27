@@ -168,7 +168,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 4 Core Metrics Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+      <div className="responsive-metrics-grid">
         
         {/* Metric 1 */}
         <div className="glass-panel" style={{ padding: '1.25rem' }}>
@@ -282,7 +282,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+          <div className="responsive-card-grid">
             {topRatedActiveTasks.slice(0, 2).map(task => (
               <TaskCard
                 key={task.id}

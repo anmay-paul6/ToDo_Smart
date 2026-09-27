@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { Dashboard } from './components/Dashboard';
 import { TaskList } from './components/TaskList';
 import { KanbanBoard } from './components/KanbanBoard';
@@ -39,6 +40,9 @@ export function App() {
     sortBy: 'priority',
     sortOrder: 'desc'
   });
+
+  // Mobile Drawer State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Modals state
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -224,7 +228,7 @@ export function App() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
       
       {/* Sticky Navigation Header */}
       <Header
@@ -249,6 +253,7 @@ export function App() {
           setFilterState(prev => ({ ...prev, priority: 'top_rated', status: 'all' }));
           setCurrentView('list');
         }}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
       />
 
       {/* Main Workspace Layout */}
@@ -270,10 +275,12 @@ export function App() {
           }}
           onResetData={handleResetSampleData}
           onExportData={handleExportData}
+          isOpenMobile={isMobileMenuOpen}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '1.75rem 2rem', overflowY: 'auto' }}>
+        <main className="app-main-content" style={{ flex: 1, padding: '1.75rem 2rem', overflowY: 'auto' }}>
           {currentView === 'dashboard' && (
             <Dashboard
               user={user}
@@ -399,6 +406,16 @@ export function App() {
         onImportData={handleImportData}
         onClearAllData={handleClearAllData}
         onResetSampleData={handleResetSampleData}
+      />
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        currentView={currentView}
+        onSelectView={setCurrentView}
+        onOpenCreateModal={() => {
+          setEditingTask(null);
+          setIsTaskModalOpen(true);
+        }}
       />
 
     </div>

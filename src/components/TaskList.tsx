@@ -273,7 +273,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           </button>
         </div>
       ) : layoutMode === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+        <div className="responsive-card-grid">
           {filteredTasks.map(task => (
             <div key={task.id} style={{ position: 'relative' }}>
               <TaskCard
